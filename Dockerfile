@@ -10,9 +10,9 @@ RUN opam install cohttp-lwt-unix
 
 COPY --chown=opam app .
 
-RUN eval $(opam env) && dune build
+RUN eval $(opam env) && sudo dune build
 
-RUN ls   -la _build/default/bin
+# RUN ls -la _build/default/bin
 
 FROM alpine:3.15.5
 
