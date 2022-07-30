@@ -1,0 +1,4 @@
+# bin/
+# obj/
+*.fsx
+_build/
