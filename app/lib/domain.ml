@@ -20,6 +20,7 @@ module MsgHandler = struct
               (Printf.sprintf
                  "git clone https://y2khub:%s@github.com/y2k/y2k.github.io %s"
                  token dir )
+          ; RunShell (Printf.sprintf "docker pull %s" repo)
           ; RunShell
               (Printf.sprintf "docker run --rm -v $PWD/%s/%s:/build_result %s"
                  dir name repo )
@@ -36,7 +37,8 @@ module CommandHandler = struct
   let handle_cmd = function
     | RunShell cmd ->
         Printf.printf "LOG: [CMD][RunShell] %s\n" cmd ;
-        flush stdout
+        flush stdout ;
+        Unix.system cmd |> ignore
     | _ ->
         print_endline "LOG: "
 end
