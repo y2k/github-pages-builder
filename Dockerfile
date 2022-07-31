@@ -7,12 +7,11 @@ RUN opam install dune
 RUN sudo apk add gmp-dev
 RUN opam install tls
 RUN opam install cohttp-lwt-unix
+RUN opam install alcotest yojson
 
 COPY --chown=opam app .
 
-RUN eval $(opam env) && sudo dune build
-
-# RUN ls -la _build/default/bin
+RUN eval $(opam env) && sudo dune build && export OCAMLRUNPARAM=b && sudo dune test
 
 FROM alpine:3.15.5
 
