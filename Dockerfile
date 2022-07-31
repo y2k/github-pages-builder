@@ -11,7 +11,7 @@ RUN opam install alcotest yojson
 
 COPY --chown=opam app .
 
-RUN eval $(opam env) && sudo dune build && export OCAMLRUNPARAM=b && sudo dune test
+RUN eval $(opam env) && sudo dune build && export OCAMLRUNPARAM=b && sudo dune runtest
 
 FROM alpine:3.15.5
 
@@ -22,5 +22,6 @@ WORKDIR /app
 COPY --from=build /app/_build/default/bin/main.exe .
 
 EXPOSE 8080
+ENV OCAMLRUNPARAM=b
 
 ENTRYPOINT ./main.exe

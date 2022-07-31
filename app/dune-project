@@ -5,15 +5,11 @@
 (generate_opam_files true)
 
 (source
- (github username/reponame))
+ (github y2k/github-pages-builder))
 
-(authors "Author Name")
-
-(maintainers "Maintainer Name")
+(authors "y2k")
 
 (license LICENSE)
-
-(documentation https://url/to/documentation)
 
 (package
  (name app)
@@ -22,5 +18,3 @@
  (depends ocaml dune)
  (tags
   (topics "to describe" your project)))
-
-; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project

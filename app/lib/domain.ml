@@ -1,19 +1,8 @@
-module Make_EventBus (T : sig
-  type m
+open Event_bus
 
-  type c
-end) (H : sig
-  val handle_msg : T.m -> T.c list
-end) (CH : sig
-  val handle_cmd : T.c -> unit
-end) =
-struct
-  let dispatch (msg : T.m) : unit = H.handle_msg msg |> List.iter CH.handle_cmd
-end
+type cmd += RunShell of string
 
-type msg = DockerWebHookEvent of string
-
-type cmd = RunShell of string
+type msg += DockerWebHookEvent of string
 
 module MsgHandler = struct
   let handle_msg (token : string) (msg : msg) : cmd list =
@@ -25,32 +14,48 @@ module MsgHandler = struct
           data |> member "repository" |> member "repo_name" |> to_string
         and name = data |> member "repository" |> member "name" |> to_string
         and dir = "__data__" in
-        [ RunShell ("rm -rf " ^ dir)
-        ; RunShell
-            (Printf.sprintf
-               "git clone https://y2khub:%s@github.com/y2k/y2k.github.io %s"
-               token dir )
-        ; RunShell
-            (Printf.sprintf "docker run --rm -v $PWD/%s/%s:/build_result %s" dir
-               name repo )
-        ; RunShell
-            (Printf.sprintf
-               "cd %s && git add . && git commit -m \"Update %s\" && git push"
-               dir repo ) ]
+        if String.starts_with ~prefix:"y2khub/" repo then
+          [ RunShell ("rm -rf " ^ dir)
+          ; RunShell
+              (Printf.sprintf
+                 "git clone https://y2khub:%s@github.com/y2k/y2k.github.io %s"
+                 token dir )
+          ; RunShell
+              (Printf.sprintf "docker run --rm -v $PWD/%s/%s:/build_result %s"
+                 dir name repo )
+          ; RunShell
+              (Printf.sprintf
+                 "cd %s && git add . && git commit -m \"Update %s\" && git push"
+                 dir repo ) ]
+        else []
+    | _ ->
+        []
 end
 
 module CommandHandler = struct
-  let handle_cmd (_cmd : cmd) : unit = ()
+  let handle_cmd = function
+    | RunShell cmd ->
+        Printf.printf "LOG: [CMD][RunShell] %s\n" cmd ;
+        flush stdout
+    | _ ->
+        print_endline "LOG: "
 end
 
-(* module EventBus =
-   Make_EventBus
-     (struct
-       type m = msg
+let log = function
+  | DockerWebHookEvent data ->
+      Printf.printf "LOG: [MSG][DockerWebHookEvent] '%s'\n" data ;
+      flush stdout
+  | _ ->
+      print_endline "LOG: Unknown event"
 
-       type c = cmd
-     end)
-     (struct
-       let handle_msg = MsgHandler.handle_msg (Sys.getenv "GPB_TOKEN")
-     end)
-     (CommandHandler) *)
+let make_dispatch token json =
+  let module EventBus =
+    Make_EventBus
+      (struct
+        let handle_msg msg =
+          log msg ;
+          MsgHandler.handle_msg token msg
+      end)
+      (CommandHandler)
+  in
+  EventBus.dispatch (DockerWebHookEvent json)

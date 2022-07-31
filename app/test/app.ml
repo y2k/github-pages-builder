@@ -2,7 +2,10 @@ open Lib.Domain
 
 let cmd_fmt =
   Fmt.of_to_string (fun xs ->
-      `List (List.map (fun (RunShell cmd) -> `String cmd) xs)
+      `List
+        (List.map
+           (function RunShell cmd -> `String cmd | _ -> failwith "not impl")
+           xs )
       |> Yojson.pretty_to_string )
 
 let cmd_list_from_json json =
@@ -14,7 +17,7 @@ let () =
   let open Alcotest in
   run "E2E"
     [ ( ""
-      , [ test_case "test" `Quick (fun _ ->
+      , [ test_case "successfully" `Quick (fun _ ->
               let expected =
                 {|[
                   "rm -rf __data__",
@@ -27,6 +30,14 @@ let () =
               let actual =
                 DockerWebHookEvent
                   {|{ "repository": { "repo_name": "y2khub/tag_game", "name": "tag_game" } }|}
+                |> MsgHandler.handle_msg "_TOKEN_"
+              in
+              check (of_pp cmd_fmt) "" expected actual )
+        ; test_case "wrong user" `Quick (fun _ ->
+              let expected = {|[]|} |> cmd_list_from_json in
+              let actual =
+                DockerWebHookEvent
+                  {|{ "repository": { "repo_name": "notme/tag_game", "name": "tag_game" } }|}
                 |> MsgHandler.handle_msg "_TOKEN_"
               in
               check (of_pp cmd_fmt) "" expected actual ) ] ) ]

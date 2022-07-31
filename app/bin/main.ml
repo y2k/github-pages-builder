@@ -1,20 +1,15 @@
-open Lwt
-open Cohttp
 open Cohttp_lwt_unix
+open Lwt.Syntax
 
-let server =
-  let callback _conn req body =
-    let uri = req |> Request.uri |> Uri.to_string in
-    let meth = req |> Request.meth |> Code.string_of_method in
-    let headers = req |> Request.headers |> Header.to_string in
-    body |> Cohttp_lwt.Body.to_string
-    >|= (fun body ->
-          Printf.sprintf "Uri: %s\nMethod: %s\nHeaders\nHeaders: %s\nBody: %s"
-            uri meth headers body )
-    >>= fun body -> Server.respond_string ~status:`OK ~body ()
+let server dispatch =
+  let callback _conn _req body =
+    let* json = body |> Cohttp_lwt.Body.to_string in
+    dispatch json ;
+    Server.respond_string ~status:`OK ~body:"" ()
   in
   Server.create ~mode:(`TCP (`Port 8080)) (Server.make ~callback ())
 
 let () =
+  let dispatch = Lib.Domain.make_dispatch (Sys.getenv "GPB_TOKEN") in
   print_endline "Server started..." ;
-  Lwt_main.run server
+  Lwt_main.run @@ server dispatch
