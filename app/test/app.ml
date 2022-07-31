@@ -26,6 +26,7 @@ let () =
                   "rm -rf __repo__/tag_game",
                   "docker pull y2khub/tag_game",
                   "docker run --rm -v $PWD/__repo__/tag_game:/build_result y2khub/tag_game",
+                  "pwd && ls -la && cd __repo__ && ls -la",
                   "cd __repo__ && git add . && git commit -m \"Update y2khub/tag_game\" && git push"
                 ]|}
                 |> cmd_list_from_json
