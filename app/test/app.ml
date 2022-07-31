@@ -20,10 +20,13 @@ let () =
       , [ test_case "successfully" `Quick (fun _ ->
               let expected =
                 {|[
-                  "rm -rf __data__",
-                  "git clone https://y2khub:_TOKEN_@github.com/y2k/y2k.github.io __data__",
-                  "docker run --rm -v $PWD/__data__/tag_game:/build_result y2khub/tag_game",
-                  "cd __data__ && git add . && git commit -m \"Update y2khub/tag_game\" && git push"
+                  "rm -rf __repo__",
+                  "git clone https://y2khub:_TOKEN_@github.com/y2k/y2k.github.io __repo__",
+                  "cd __repo__ && git config user.email \"itwisterlx@gmail.com\" && git config user.name \"y2k\"",
+                  "rm -rf __repo__/tag_game",
+                  "docker pull y2khub/tag_game",
+                  "docker run --rm -v $PWD/__repo__/tag_game:/build_result y2khub/tag_game",
+                  "cd __repo__ && git add . && git commit -m \"Update y2khub/tag_game\" && git push"
                 ]|}
                 |> cmd_list_from_json
               in

@@ -13,13 +13,18 @@ module MsgHandler = struct
         let repo =
           data |> member "repository" |> member "repo_name" |> to_string
         and name = data |> member "repository" |> member "name" |> to_string
-        and dir = "__data__" in
+        and dir = "__repo__" in
         if String.starts_with ~prefix:"y2khub/" repo then
           [ RunShell ("rm -rf " ^ dir)
           ; RunShell
               (Printf.sprintf
                  "git clone https://y2khub:%s@github.com/y2k/y2k.github.io %s"
                  token dir )
+          ; RunShell
+              (Printf.sprintf
+                 {|cd %s && git config user.email "itwisterlx@gmail.com" && git config user.name "y2k"|}
+                 dir )
+          ; RunShell (Printf.sprintf "rm -rf %s/%s" dir name)
           ; RunShell (Printf.sprintf "docker pull %s" repo)
           ; RunShell
               (Printf.sprintf "docker run --rm -v $PWD/%s/%s:/build_result %s"
