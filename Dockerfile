@@ -13,7 +13,7 @@ COPY --chown=opam app .
 
 RUN eval $(opam env) && sudo dune build && export OCAMLRUNPARAM=b && sudo dune runtest
 
-FROM docker:20.10.17-dind-alpine3.16
+FROM docker:20.10.17-alpine3.16
 
 RUN apk add gmp
 RUN apk add git
