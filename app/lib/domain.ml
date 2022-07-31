@@ -29,6 +29,7 @@ module MsgHandler = struct
           ; RunShell
               (Printf.sprintf "docker run --rm -v $PWD/%s/%s:/build_result %s"
                  dir name repo )
+          ; RunShell "pwd && ls -la && cd __repo__ && ls -la"
           ; RunShell
               (Printf.sprintf
                  "cd %s && git add . && git commit -m \"Update %s\" && git push"
