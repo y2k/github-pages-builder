@@ -42,28 +42,34 @@ module MsgHandler = struct
 end
 
 module CommandHandler = struct
-  let handle_cmd = function
+  let log_cmd cmd =
+    ( match cmd with
     | RunShell cmd ->
-        Printf.printf "LOG: [CMD][RunShell] %s\n" cmd ;
-        flush stdout ;
-        Unix.system cmd |> ignore
-    | _ ->
-        print_endline "LOG: "
+        Printf.sprintf "LOG: [CMD][RunShell] %s\n" cmd
+    | cmd ->
+        let open Obj.Extension_constructor in
+        Printf.sprintf "LOG: [CMD][%s]" (name (of_val cmd)) )
+    |> print_endline
+
+  let handle_cmd cmd =
+    log_cmd cmd ;
+    match cmd with RunShell cmd -> Unix.system cmd |> ignore | _ -> ()
 end
 
-let log = function
+let log_msg = function
   | DockerWebHookEvent data ->
       Printf.printf "LOG: [MSG][DockerWebHookEvent] '%s'\n" data ;
       flush stdout
-  | _ ->
-      print_endline "LOG: Unknown event"
+  | msg ->
+      let open Obj.Extension_constructor in
+      print_endline @@ "LOG: [MSG][" ^ name (of_val msg) ^ "]"
 
 let make_dispatch token json =
   let module EventBus =
     Make_EventBus
       (struct
         let handle_msg msg =
-          log msg ;
+          log_msg msg ;
           MsgHandler.handle_msg token msg
       end)
       (CommandHandler)
