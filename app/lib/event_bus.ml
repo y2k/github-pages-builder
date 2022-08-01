@@ -8,5 +8,6 @@ end) (CH : sig
   val handle_cmd : cmd -> unit
 end) =
 struct
-  let dispatch (msg : msg) : unit = H.handle_msg msg |> List.iter CH.handle_cmd
+  let dispatch (msg : msg) : unit =
+    H.handle_msg msg |> List.iter CH.handle_cmd
 end

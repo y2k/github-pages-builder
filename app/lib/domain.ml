@@ -13,27 +13,29 @@ module MsgHandler = struct
         let repo =
           data |> member "repository" |> member "repo_name" |> to_string
         and name = data |> member "repository" |> member "name" |> to_string
-        and dir = "__repo__" in
+        and repo_dir = "__repo__"
+        and build_dir = "__build__" in
         if String.starts_with ~prefix:"y2khub/" repo then
-          [ RunShell ("rm -rf " ^ dir)
+          [ RunShell ("rm -rf " ^ repo_dir)
+          ; RunShell ("rm -rf " ^ build_dir)
           ; RunShell
               (Printf.sprintf
                  "git clone https://y2khub:%s@github.com/y2k/y2k.github.io %s"
-                 token dir )
+                 token repo_dir )
           ; RunShell
               (Printf.sprintf
                  {|cd %s && git config user.email "itwisterlx@gmail.com" && git config user.name "y2k"|}
-                 dir )
-          ; RunShell (Printf.sprintf "rm -rf %s/%s" dir name)
+                 repo_dir )
+          ; RunShell (Printf.sprintf "rm -rf %s/%s" repo_dir name)
           ; RunShell (Printf.sprintf "docker pull %s" repo)
           ; RunShell
-              (Printf.sprintf "docker run --rm -v $PWD/%s/%s:/build_result %s"
-                 dir name repo )
-          ; RunShell "pwd && ls -la && cd __repo__ && ls -la"
+              (Printf.sprintf
+                 "docker run --rm -v gpbuilder_shared:/build_result %s" repo )
+          ; RunShell (Printf.sprintf "cp -r %s %s/%s" build_dir repo_dir name)
           ; RunShell
               (Printf.sprintf
                  "cd %s && git add . && git commit -m \"Update %s\" && git push"
-                 dir repo ) ]
+                 repo_dir repo ) ]
         else []
     | _ ->
         []
