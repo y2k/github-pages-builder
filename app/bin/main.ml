@@ -1,10 +1,11 @@
+open Cohttp
 open Cohttp_lwt_unix
 open Lwt.Syntax
 
 let server dispatch =
-  let callback _conn _req body =
+  let callback _conn req body =
     let* json = body |> Cohttp_lwt.Body.to_string in
-    dispatch json ;
+    dispatch (Request.resource req, json) ;
     Server.respond_string ~status:`OK ~body:"" ()
   in
   Server.create ~mode:(`TCP (`Port 8080)) (Server.make ~callback ())
