@@ -14,32 +14,28 @@ module MsgHandler = struct
           data |> member "repository" |> member "repo_name" |> to_string
         and name = data |> member "repository" |> member "name" |> to_string
         and repo_dir = "__repo__"
-        and container_name = ""
+        and container_name = "ghb__temp_container__"
         and build_dir = "__build__" in
         if String.starts_with ~prefix:"y2khub/" repo then
-          [ RunShell ("rm -rf " ^ repo_dir)
-          ; RunShell ("rm -rf " ^ build_dir)
-          ; RunShell
-              (Printf.sprintf
-                 "git clone https://y2khub:%s@github.com/y2k/y2k.github.io %s"
-                 token repo_dir )
-          ; RunShell
-              (Printf.sprintf
-                 {|cd %s && git config user.email "itwisterlx@gmail.com" && git config user.name "y2k"|}
-                 repo_dir )
-          ; RunShell (Printf.sprintf "rm -rf %s/%s" repo_dir name)
-          ; RunShell (Printf.sprintf "docker pull %s" repo)
-          ; RunShell (Printf.sprintf "docker rm -f %s" container_name)
-          ; RunShell
-              (Printf.sprintf "docker create --name %s %s" container_name repo)
-          ; RunShell
-              (Printf.sprintf "docker cp %s:/build_result/ %s/%s" container_name
-                 repo_dir name )
-          ; RunShell
-              (Printf.sprintf
-                 "cd %s && git add . && git commit -m \"Update %s\"" repo_dir
-                 repo )
-            (* ; RunShell (Printf.sprintf "cd %s && git push" repo_dir) *) ]
+          let open Printf in
+          [ "rm -rf " ^ repo_dir
+          ; "rm -rf " ^ build_dir
+          ; sprintf
+              "git clone https://y2khub:%s@github.com/y2k/y2k.github.io %s"
+              token repo_dir
+          ; sprintf
+              {|cd %s && git config user.email "itwisterlx@gmail.com" && git config user.name "y2k"|}
+              repo_dir
+          ; sprintf "rm -rf %s/%s" repo_dir name
+          ; sprintf "docker pull %s" repo
+          ; sprintf "docker rm -f %s" container_name
+          ; sprintf "docker create --name %s %s" container_name repo
+          ; sprintf "docker cp %s:/build_result/ %s/%s" container_name repo_dir
+              name
+          ; sprintf "cd %s && git add . && git commit -m \"Update %s\"" repo_dir
+              repo
+          ; sprintf "cd %s && git push" repo_dir ]
+          |> List.map (fun x -> RunShell x)
         else []
     | DockerWebHookEvent ("/webhook", json) ->
         let open Yojson.Basic.Util in
