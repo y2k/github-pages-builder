@@ -15,14 +15,12 @@ let cmd_list_from_json json =
 
 let () =
   let open Alcotest in
-  let env = {token= "_TOKEN_"} in
+  let env = {token= "_TOKEN_"; temp_dir= ""} in
   run "E2E"
     [ ( ""
       , [ test_case "webhook2" `Quick (fun _ ->
               let expected =
                 {|[
-            "rm -rf __repo__",
-            "rm -rf __build__",
             "git clone https://y2khub:_TOKEN_@github.com/y2k/y2k.github.io __repo__",
             "cd __repo__ && git config user.email \"itwisterlx@gmail.com\" && git config user.name \"y2k\"",
             "rm -rf __repo__/ff_ext",
@@ -31,7 +29,8 @@ let () =
             "docker create --name ghb__temp_container__ y2khub/ff_ext",
             "docker cp ghb__temp_container__:/build_result/ __repo__/ff_ext",
             "cd __repo__ && git add . && git commit -m \"Update y2khub/ff_ext\"",
-            "cd __repo__ && git push"
+            "cd __repo__ && git push",
+            "rm -rf __repo__"
            ]|}
                 |> cmd_list_from_json
               in

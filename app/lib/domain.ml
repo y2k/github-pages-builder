@@ -4,7 +4,7 @@ type cmd += RunShell of string
 
 type msg += DockerWebHookEvent of string * string
 
-type env = {token: string}
+type env = {token: string; temp_dir: string}
 
 module MsgHandler = struct
   let handle_msg (env : env) (msg : msg) : cmd list =
@@ -15,14 +15,11 @@ module MsgHandler = struct
         let repo =
           data |> member "repository" |> member "repo_name" |> to_string
         and name = data |> member "repository" |> member "name" |> to_string
-        and repo_dir = "__repo__"
-        and container_name = "ghb__temp_container__"
-        and build_dir = "__build__" in
+        and repo_dir = env.temp_dir ^ "__repo__"
+        and container_name = "ghb__temp_container__" in
         if String.starts_with ~prefix:"y2khub/" repo then
           let open Printf in
-          [ "rm -rf " ^ repo_dir
-          ; "rm -rf " ^ build_dir
-          ; sprintf
+          [ sprintf
               "git clone https://y2khub:%s@github.com/y2k/y2k.github.io %s"
               env.token repo_dir
           ; sprintf
@@ -36,7 +33,8 @@ module MsgHandler = struct
               name
           ; sprintf "cd %s && git add . && git commit -m \"Update %s\"" repo_dir
               repo
-          ; sprintf "cd %s && git push" repo_dir ]
+          ; sprintf "cd %s && git push" repo_dir
+          ; "rm -rf " ^ repo_dir ]
           |> List.map (fun x -> RunShell x)
         else []
     | DockerWebHookEvent ("/webhook", json) ->
@@ -45,7 +43,7 @@ module MsgHandler = struct
         let repo =
           data |> member "repository" |> member "repo_name" |> to_string
         and name = data |> member "repository" |> member "name" |> to_string
-        and repo_dir = "__repo__"
+        and repo_dir = env.temp_dir ^ "__repo__"
         and build_dir = "__build__" in
         if String.starts_with ~prefix:"y2khub/" repo then
           [ RunShell ("rm -rf " ^ repo_dir)
