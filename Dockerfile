@@ -20,7 +20,7 @@ RUN apk add git
 
 WORKDIR /app
 
-COPY --from=build /app/_build/default/bin/main.exe .
+COPY --from=build /app/_build/default/app/main.exe .
 
 EXPOSE 8080
 ENV OCAMLRUNPARAM=b
