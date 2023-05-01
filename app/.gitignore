@@ -1,4 +1,4 @@
 # bin/
 # obj/
-*.fsx
+playground/
 _build/

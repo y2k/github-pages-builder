@@ -1,3 +1,4 @@
-(test
- (name test)
+(tests
+ ; (name test)
+ (names test integration)
  (libraries lib alcotest))

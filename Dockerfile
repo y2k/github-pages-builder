@@ -11,7 +11,7 @@ RUN opam install alcotest yojson
 
 COPY --chown=opam app .
 
-RUN eval $(opam env) && sudo dune build && export OCAMLRUNPARAM=b && sudo dune runtest
+RUN eval $(opam env) && sudo dune build && export OCAMLRUNPARAM=b && sudo make test
 
 FROM docker:20.10.17-alpine3.16
 
@@ -20,7 +20,7 @@ RUN apk add git
 
 WORKDIR /app
 
-COPY --from=build /app/_build/default/bin/main.exe .
+COPY --from=build /app/_build/default/app/main.exe .
 
 EXPOSE 8080
 ENV OCAMLRUNPARAM=b
