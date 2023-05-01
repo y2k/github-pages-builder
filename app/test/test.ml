@@ -15,6 +15,7 @@ let cmd_list_from_json json =
 
 let () =
   let open Alcotest in
+  let env = {token= "_TOKEN_"} in
   run "E2E"
     [ ( ""
       , [ test_case "webhook2" `Quick (fun _ ->
@@ -39,7 +40,7 @@ let () =
                   ( "/webhook2"
                   , {|{ "repository": { "repo_name": "y2khub/ff_ext", "name": "ff_ext" } }|}
                   )
-                |> MsgHandler.handle_msg "_TOKEN_"
+                |> MsgHandler.handle_msg env
               in
               check (of_pp cmd_fmt) "" expected actual )
         ; test_case "webhook1" `Quick (fun _ ->
@@ -62,7 +63,7 @@ let () =
                   ( "/webhook"
                   , {|{ "repository": { "repo_name": "y2khub/tag_game", "name": "tag_game" } }|}
                   )
-                |> MsgHandler.handle_msg "_TOKEN_"
+                |> MsgHandler.handle_msg env
               in
               check (of_pp cmd_fmt) "" expected actual )
         ; test_case "wrong user" `Quick (fun _ ->
@@ -72,6 +73,6 @@ let () =
                   ( "/webhook"
                   , {|{ "repository": { "repo_name": "notme/tag_game", "name": "tag_game" } }|}
                   )
-                |> MsgHandler.handle_msg "_TOKEN_"
+                |> MsgHandler.handle_msg env
               in
               check (of_pp cmd_fmt) "" expected actual ) ] ) ]

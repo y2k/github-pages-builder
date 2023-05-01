@@ -10,6 +10,6 @@ let server dispatch =
   Server.create ~mode:(`TCP (`Port 8080)) (Server.make ~callback ())
 
 let () =
-  let dispatch = Lib.Domain.make_dispatch (Sys.getenv "GPB_TOKEN") in
+  let dispatch = Lib.Domain.make_dispatch {token= Sys.getenv "GPB_TOKEN"} in
   print_endline "Server started..." ;
   Lwt_main.run @@ server dispatch

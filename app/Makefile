@@ -1,7 +1,10 @@
+.PHONY: run test e2e
+
 run:
-	dune build && export GPB_TOKEN=1 && ./_build/default/bin/main.exe
+	dune build && export GPB_TOKEN=1 && ./_build/default/app/main.exe
 
 test:
-	dune test
+	dune build && ./_build/default/test/test.exe
 
-.PHONY: run test
+e2e:
+	dune build && ./_build/default/test/integration.exe

@@ -4,8 +4,10 @@ type cmd += RunShell of string
 
 type msg += DockerWebHookEvent of string * string
 
+type env = {token: string}
+
 module MsgHandler = struct
-  let handle_msg (token : string) (msg : msg) : cmd list =
+  let handle_msg (env : env) (msg : msg) : cmd list =
     match msg with
     | DockerWebHookEvent ("/webhook2", json) ->
         let open Yojson.Basic.Util in
@@ -22,7 +24,7 @@ module MsgHandler = struct
           ; "rm -rf " ^ build_dir
           ; sprintf
               "git clone https://y2khub:%s@github.com/y2k/y2k.github.io %s"
-              token repo_dir
+              env.token repo_dir
           ; sprintf
               {|cd %s && git config user.email "itwisterlx@gmail.com" && git config user.name "y2k"|}
               repo_dir
@@ -51,7 +53,7 @@ module MsgHandler = struct
           ; RunShell
               (Printf.sprintf
                  "git clone https://y2khub:%s@github.com/y2k/y2k.github.io %s"
-                 token repo_dir )
+                 env.token repo_dir )
           ; RunShell
               (Printf.sprintf
                  {|cd %s && git config user.email "itwisterlx@gmail.com" && git config user.name "y2k"|}
