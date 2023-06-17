@@ -24,10 +24,11 @@ let () =
             "git clone https://y2khub:_TOKEN_@github.com/y2k/y2k.github.io __repo__",
             "cd __repo__ && git config user.email \"itwisterlx@gmail.com\" && git config user.name \"y2k\"",
             "rm -rf __repo__/ff_ext",
-            "docker pull y2khub/ff_ext",
+            "docker pull -q y2khub/ff_ext",
             "docker rm -f ghb__temp_container__",
             "docker create --name ghb__temp_container__ y2khub/ff_ext",
             "docker cp ghb__temp_container__:/build_result/ __repo__/ff_ext",
+            "docker rm -f ghb__temp_container__",
             "cd __repo__ && git add . && git commit -m \"Update y2khub/ff_ext\"",
             "cd __repo__ && git push",
             "rm -rf __repo__"

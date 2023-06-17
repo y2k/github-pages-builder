@@ -26,11 +26,12 @@ module MsgHandler = struct
               {|cd %s && git config user.email "itwisterlx@gmail.com" && git config user.name "y2k"|}
               repo_dir
           ; sprintf "rm -rf %s/%s" repo_dir name
-          ; sprintf "docker pull %s" repo
+          ; sprintf "docker pull -q %s" repo
           ; sprintf "docker rm -f %s" container_name
           ; sprintf "docker create --name %s %s" container_name repo
           ; sprintf "docker cp %s:/build_result/ %s/%s" container_name repo_dir
               name
+          ; sprintf "docker rm -f %s" container_name
           ; sprintf "cd %s && git add . && git commit -m \"Update %s\"" repo_dir
               repo
           ; sprintf "cd %s && git push" repo_dir
