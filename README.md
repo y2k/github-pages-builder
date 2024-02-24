@@ -12,7 +12,7 @@
 - ocaml
 - git
 - docker
-- suave
+- lwt server
 
 ## Поток событий
 
