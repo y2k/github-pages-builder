@@ -12,7 +12,7 @@
 - ocaml
 - git
 - docker
-- lwt server
+- cohttp
 
 ## Поток событий
 
